@@ -13,12 +13,12 @@ export default function AdminIntegrations() {
   const [rawView, setRawView] = useState(null); // { order, logs, loading }
   const origin = window.location.origin;
 
-  // Open the raw-payload viewer for one order (all logged scraping results for it)
-  const openRaw = (o) => {
-    setRawView({ order: o, logs: [], loading: true });
-    api.integrationLogs('?external_id=' + encodeURIComponent(o.external_id) + '&full=1&limit=50')
-      .then(logs => setRawView({ order: o, logs: Array.isArray(logs) ? logs : [], loading: false }))
-      .catch(() => setRawView({ order: o, logs: [], loading: false }));
+  // Open a viewer for one order. mode = 'details' (full payload/raw) or 'status' (status log).
+  const openRaw = (o, mode) => {
+    setRawView({ order: o, logs: [], loading: true, mode: mode || 'details' });
+    api.integrationLogs('?external_id=' + encodeURIComponent(o.external_id) + '&full=1&limit=100')
+      .then(logs => setRawView({ order: o, logs: Array.isArray(logs) ? logs : [], loading: false, mode: mode || 'details' }))
+      .catch(() => setRawView({ order: o, logs: [], loading: false, mode: mode || 'details' }));
   };
   const copyRaw = () => {
     if (!rawView) return;
@@ -162,7 +162,7 @@ export default function AdminIntegrations() {
 
       <table className="data-table">
         <thead>
-          <tr><th>Source</th><th>Order #</th><th>External ID</th><th>Customer</th><th>Total</th><th>Stage</th><th>Payment</th><th>When</th><th>Payload</th></tr>
+          <tr><th>Source</th><th>Order #</th><th>External ID</th><th>Customer</th><th>Total</th><th>Stage</th><th>Payment</th><th>When</th><th>Details / Status</th></tr>
         </thead>
         <tbody>
           {orders.map(o => (
@@ -175,7 +175,10 @@ export default function AdminIntegrations() {
               <td>{o.channel_state ? <span className="badge" style={{ background: '#e0f2fe', color: '#075985', padding: '2px 8px', borderRadius: 4 }}>{String(o.channel_state).replace('_', ' ')}</span> : '—'}</td>
               <td><span className={'badge badge-' + o.status}>{o.status}</span></td>
               <td>{new Date(o.created_at).toLocaleString()}</td>
-              <td><button className="btn" style={{ padding: '2px 10px', fontSize: 12, cursor: 'pointer', borderRadius: 6, border: '1px solid #d1d5db' }} onClick={() => openRaw(o)}>🔍 View</button></td>
+              <td style={{ whiteSpace: 'nowrap' }}>
+                <button className="btn" style={{ padding: '2px 8px', fontSize: 12, cursor: 'pointer', borderRadius: 6, border: '1px solid #d1d5db', marginRight: 4 }} onClick={() => openRaw(o, 'details')}>📄 Details</button>
+                <button className="btn" style={{ padding: '2px 8px', fontSize: 12, cursor: 'pointer', borderRadius: 6, border: '1px solid #d1d5db' }} onClick={() => openRaw(o, 'status')}>📊 Status log</button>
+              </td>
             </tr>
           ))}
           {orders.length === 0 && !loading && (
@@ -196,43 +199,71 @@ export default function AdminIntegrations() {
         </div>
       </div>
 
-      {/* Raw payload viewer modal — shows EVERYTHING scraped/received for the order */}
-      {rawView && (
-        <div
-          onClick={() => setRawView(null)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
-        >
+      {/* Viewer modal — two modes: Details (full payload/raw) and Status log (state history) */}
+      {rawView && (() => {
+        const isStatus = rawView.mode === 'status';
+        // newest-first for details; oldest-first (chronological) for the status log
+        const logs = rawView.logs.slice();
+        const statusLogs = logs.slice().sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        const latest = logs[0];
+        const stateOf = (l) => (l && l.payload && l.payload.meta && (l.payload.meta.state)) || '—';
+        return (
+        <div onClick={() => setRawView(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 10, width: 'min(900px, 96vw)', maxHeight: '88vh', display: 'flex', flexDirection: 'column', boxShadow: '0 10px 40px rgba(0,0,0,0.3)' }}>
             <div style={{ padding: '14px 18px', borderBottom: '1px solid #e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
               <div>
-                <strong>Raw payload — {rawView.order.source} #{rawView.order.external_id}</strong>
-                <div className="muted-sm">Order {rawView.order.order_no} · {rawView.order.customer_name || 'no customer'} · everything received from the platform</div>
+                <strong>{isStatus ? '📊 Status log' : '📄 Order details'} — {rawView.order.source} #{rawView.order.external_id}</strong>
+                <div className="muted-sm">Order {rawView.order.order_no} · {rawView.order.customer_name || 'no customer'}</div>
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
-                <button className="btn" style={{ padding: '6px 12px', cursor: 'pointer', borderRadius: 6, border: '1px solid #d1d5db' }} onClick={copyRaw}>📋 Copy JSON</button>
+                <button className="btn" style={{ padding: '6px 12px', cursor: 'pointer', borderRadius: 6, border: '1px solid ' + (isStatus ? '#d1d5db' : '#ff6b35'), background: isStatus ? '#fff' : '#fff7ed', fontWeight: isStatus ? 400 : 700 }} onClick={() => setRawView(v => ({ ...v, mode: 'details' }))}>Details</button>
+                <button className="btn" style={{ padding: '6px 12px', cursor: 'pointer', borderRadius: 6, border: '1px solid ' + (isStatus ? '#ff6b35' : '#d1d5db'), background: isStatus ? '#fff7ed' : '#fff', fontWeight: isStatus ? 700 : 400 }} onClick={() => setRawView(v => ({ ...v, mode: 'status' }))}>Status log</button>
+                {!isStatus && <button className="btn" style={{ padding: '6px 12px', cursor: 'pointer', borderRadius: 6, border: '1px solid #d1d5db' }} onClick={copyRaw}>📋 Copy</button>}
                 <button className="btn" style={{ padding: '6px 12px', cursor: 'pointer', borderRadius: 6, border: '1px solid #d1d5db' }} onClick={() => setRawView(null)}>✕ Close</button>
               </div>
             </div>
             <div style={{ padding: 16, overflow: 'auto' }}>
-              {rawView.loading && <p className="muted-sm">Loading payload…</p>}
-              {!rawView.loading && rawView.logs.length === 0 && (
-                <p className="muted-sm">No payload logged for this order yet. (Logs are captured from each extension sync — once the v8.1 extension runs, the full scraped JSON appears here.)</p>
+              {rawView.loading && <p className="muted-sm">Loading…</p>}
+              {!rawView.loading && logs.length === 0 && (
+                <p className="muted-sm">No log captured for this order yet. Once the passive-capture extension (v8.2) runs and the dashboard loads this order, its details and status history appear here.</p>
               )}
-              {!rawView.loading && rawView.logs.map((log, i) => (
-                <div key={log.id || i} style={{ marginBottom: 18 }}>
+
+              {/* STATUS LOG — chronological state changes */}
+              {!rawView.loading && isStatus && logs.length > 0 && (
+                <table className="data-table">
+                  <thead><tr><th>Time</th><th>State</th><th>Outcome</th><th>Items</th><th>Total</th><th>Via</th></tr></thead>
+                  <tbody>
+                    {statusLogs.map((l, i) => (
+                      <tr key={l.id || i}>
+                        <td>{new Date(l.created_at).toLocaleString()}</td>
+                        <td><span className="badge" style={{ background: '#e0f2fe', color: '#075985', padding: '2px 8px', borderRadius: 4 }}>{stateOf(l)}</span></td>
+                        <td className="muted-sm">{l.outcome}</td>
+                        <td>{l.items_count}</td>
+                        <td>₹{l.total}</td>
+                        <td className="muted-sm">{l.payload && l.payload.meta && l.payload.meta.captured_via ? l.payload.meta.captured_via : '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+
+              {/* DETAILS — full payload + raw platform JSON (latest capture) */}
+              {!rawView.loading && !isStatus && latest && (
+                <div>
                   <div className="muted-sm" style={{ marginBottom: 6 }}>
-                    Log #{log.id} · {new Date(log.created_at).toLocaleString()} · outcome: <strong>{log.outcome}</strong> · items: {log.items_count} · total: ₹{log.total}
+                    Latest capture: {new Date(latest.created_at).toLocaleString()} · outcome: <strong>{latest.outcome}</strong> · items: {latest.items_count} · total: ₹{latest.total}
                   </div>
                   <div style={{ fontSize: 12, fontWeight: 600, margin: '8px 0 4px', color: '#374151' }}>Payload sent to POS</div>
-                  <pre style={{ background: '#0b1021', color: '#d1e7ff', padding: 12, borderRadius: 6, overflow: 'auto', fontSize: 12, maxHeight: 260, margin: 0 }}>{JSON.stringify(log.payload, null, 2)}</pre>
-                  <div style={{ fontSize: 12, fontWeight: 600, margin: '10px 0 4px', color: '#374151' }}>Complete raw platform JSON (full scrape)</div>
-                  <pre style={{ background: '#0b1021', color: '#c7f9cc', padding: 12, borderRadius: 6, overflow: 'auto', fontSize: 12, maxHeight: 360, margin: 0 }}>{log.raw_platform ? JSON.stringify(log.raw_platform, null, 2) : '(no raw platform JSON — old extension sends IDs only; update to v8.1)'}</pre>
+                  <pre style={{ background: '#0b1021', color: '#d1e7ff', padding: 12, borderRadius: 6, overflow: 'auto', fontSize: 12, maxHeight: 260, margin: 0 }}>{JSON.stringify(latest.payload, null, 2)}</pre>
+                  <div style={{ fontSize: 12, fontWeight: 600, margin: '10px 0 4px', color: '#374151' }}>Complete raw order-details JSON (from the platform)</div>
+                  <pre style={{ background: '#0b1021', color: '#c7f9cc', padding: 12, borderRadius: 6, overflow: 'auto', fontSize: 12, maxHeight: 380, margin: 0 }}>{latest.raw_platform ? JSON.stringify(latest.raw_platform, null, 2) : '(no order-details captured yet — the passive-capture extension logs it once the dashboard loads this order)'}</pre>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

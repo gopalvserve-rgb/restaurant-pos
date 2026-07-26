@@ -1,14 +1,22 @@
 {
   "manifest_version": 3,
-  "name": "Restaurant POS Sync (v8.1 \u2014 full order detail)",
-  "version": "8.1.0",
-  "description": "Sync brands, outlets, menu, reviews and FULL live order detail (customer, items, price, status) from Swiggy/Zomato into Restaurant POS",
+  "name": "Restaurant POS Sync (v8.2 \u2014 passive network capture)",
+  "version": "8.2.0",
+  "description": "Passively captures Zomato/Swiggy order-details from the dashboard's own network traffic (no self-calls) and syncs full order detail into Restaurant POS",
   "permissions": [
     "storage",
     "notifications",
     "alarms",
     "scripting",
     "activeTab"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://www.zomato.com/*"],
+      "js": ["inject-capture.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    }
   ],
   "host_permissions": [
     "https://www.zomato.com/*",
