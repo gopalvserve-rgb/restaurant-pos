@@ -1,0 +1,50 @@
+{
+  "manifest_version": 3,
+  "name": "Restaurant POS - Order Sync",
+  "version": "1.0.0",
+  "description": "Captures orders from Swiggy Partner & Zomato for Business dashboards and syncs to your Restaurant POS in real time.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "restaurant-pos-sync@gopalvserve.dev",
+      "strict_min_version": "115.0"
+    }
+  },
+  "permissions": ["storage", "notifications", "alarms"],
+  "host_permissions": [
+    "https://partner.swiggy.com/*",
+    "https://www.swiggy.com/partner/*",
+    "https://www.zomato.com/partners/*",
+    "https://*.zomato.com/*",
+    "https://restaurant-pos-app-production.up.railway.app/*",
+    "http://localhost:3000/*"
+  ],
+  "background": {
+    "scripts": ["background.js"],
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://partner.swiggy.com/*", "https://www.swiggy.com/partner/*"],
+      "js": ["scrapers/swiggy.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://www.zomato.com/partners/*", "https://*.zomato.com/partners/*"],
+      "js": ["scrapers/zomato.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body { font-family: -apple-system, system-ui, sans-serif; width: 360px; margin: 0; padding: 0; background: #1a1a1a; color: #f0f0f0; }
+  header { background: linear-gradient(135deg, #ff6b35, #e63946); padding: 16px; }
+  h1 { margin: 0; font-size: 16px; color: white; }
+  .sub { font-size: 11px; color: rgba(255,255,255,0.85); margin-top: 4px; }
+  .body { padding: 14px; }
+  label { display: block; font-size: 11px; color: #aaa; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  select, input { width: 100%; padding: 9px; background: #2a2a2a; color: #fff; border: 1px solid #3a3a3a; border-radius: 6px; box-sizing: border-box; font-size: 13px; }
+  .row { margin-bottom: 12px; }
+  .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  button { padding: 12px 8px; background: #2a2a2a; color: #fff; border: 1px solid #3a3a3a; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.15s; }
+  button:hover:not(:disabled) { background: #ff6b35; border-color: #ff6b35; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button .ico { font-size: 18px; display: block; margin-bottom: 4px; }
+  .status { margin-top: 12px; padding: 10px; background: #2a2a2a; border-radius: 6px; font-size: 12px; min-height: 40px; max-height: 140px; overflow-y: auto; }
+  .status .line { margin-bottom: 4px; }
+  .ok { color: #4ade80; }
+  .err { color: #f87171; }
+  .info { color: #93c5fd; }
+  .pull { background: #ff6b35 !important; color: white !important; border-color: #ff6b35 !important; grid-column: 1 / -1; }
+  footer { padding: 10px 14px; background: #0a0a0a; font-size: 11px; color: #666; display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>🍽️ Restaurant POS Sync</h1>
+    <div class="sub">v7 · Platform-aware data sync</div>
+  </header>
+  <div class="body">
+    <div class="row">
+      <label>Platform</label>
+      <select id="platform">
+        <option value="zomato">🟥 Zomato Partner</option>
+        <option value="swiggy">🟧 Swiggy Partner</option>
+      </select>
+    </div>
+    <div class="row">
+      <label>CRM endpoint</label>
+      <input id="endpoint" placeholder="https://your-app.up.railway.app" />
+    </div>
+    <div class="btn-grid">
+      <button id="syncOutlets"><span class="ico">🏪</span>Sync Outlets</button>
+      <button id="syncMenu"><span class="ico">🍽️</span>Sync Menu</button>
+      <button id="syncInventory"><span class="ico">📦</span>Sync Inventory</button>
+      <button id="syncOrders"><span class="ico">🧾</span>Sync Orders</button>
+      <button id="pollOn" class="pull">▶ Start Auto-Pull (Orders)</button>
+    </div>
+    <div class="status" id="status"><span class="info">Ready. Choose platform, then click a Sync button.</span></div>
+  </div>
+  <footer>
+    <span id="footPlatform">Zomato</span>
+    <span id="footState">idle</span>
+  </footer>
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.railway.up.restaurant_pos_app_production.twa",
+        "sha256_cert_fingerprints": ["69:D0:08:66:AD:5B:5A:4F:02:91:E9:08:BF:DE:62:21:59:0F:AF:80:39:98:3E:23:60:31:44:82:25:B4:01:9D"]
+      }
+    }]

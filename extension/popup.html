@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Restaurant POS Sync</title>
+  <style>
+    body { font-family: -apple-system, system-ui, sans-serif; width: 340px; padding: 14px; font-size: 13px; color: #0f172a; }
+    h2 { font-size: 16px; margin: 0 0 4px; color: #b45309; }
+    .sub { color: #64748b; font-size: 11px; margin-bottom: 12px; }
+    label { display: block; font-weight: 600; margin-top: 10px; font-size: 11px; color: #475569; text-transform: uppercase; letter-spacing: 0.04em; }
+    input { width: 100%; padding: 7px 9px; border: 1px solid #cbd5e1; border-radius: 5px; font-size: 13px; box-sizing: border-box; }
+    button { background: #d97706; color: white; border: none; padding: 9px 12px; border-radius: 5px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 12px; }
+    button.sec { background: #e2e8f0; color: #0f172a; }
+    .stat { background: #fef3c7; padding: 10px; border-radius: 6px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .stat b { font-size: 18px; color: #b45309; }
+    .toggle { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+    .ok { color: #16a34a; font-size: 11px; }
+    .warn { color: #dc2626; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <h2>🍽️ Restaurant POS Sync</h2>
+  <div class="sub">Captures orders from Swiggy & Zomato partner dashboards</div>
+
+  <div class="stat">
+    <span>Orders synced</span>
+    <b id="count">0</b>
+  </div>
+  <div id="lastSync" class="sub" style="margin-top: 6px;"></div>
+
+  <div class="toggle">
+    <input type="checkbox" id="enabled" />
+    <label for="enabled" style="margin-top: 0;">Sync enabled</label>
+  </div>
+
+  <label>POS URL</label>
+  <input id="posUrl" placeholder="https://restaurant-pos-app-production.up.railway.app" />
+
+  <label>API Key (optional)</label>
+  <input id="apiKey" type="password" placeholder="leave blank if not set" />
+
+  <button id="save">Save Settings</button>
+  <button class="sec" id="reset">Reset sync count</button>
+
+  <div class="sub" style="margin-top: 14px;">
+    Open your Swiggy Partner or Zomato for Business tab — new orders will be auto-detected and sent.
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

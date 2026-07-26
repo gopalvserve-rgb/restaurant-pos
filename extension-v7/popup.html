@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body { font-family: -apple-system, system-ui, sans-serif; width: 380px; margin: 0; padding: 0; background: #0f0f0f; color: #f0f0f0; }
+  header { background: linear-gradient(135deg, #ff6b35, #e63946); padding: 14px 16px; }
+  h1 { margin: 0; font-size: 16px; color: white; }
+  .sub { font-size: 11px; color: rgba(255,255,255,0.85); margin-top: 4px; }
+  .body { padding: 12px; }
+  label { display: block; font-size: 10px; color: #888; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  select, input { width: 100%; padding: 8px; background: #1f1f1f; color: #fff; border: 1px solid #2a2a2a; border-radius: 5px; box-sizing: border-box; font-size: 12px; }
+  .row { margin-bottom: 10px; }
+  .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 10px; }
+  button { padding: 10px 6px; background: #1f1f1f; color: #fff; border: 1px solid #2a2a2a; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: 600; transition: all 0.15s; }
+  button:hover:not(:disabled) { background: #ff6b35; border-color: #ff6b35; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button .ico { font-size: 16px; display: block; margin-bottom: 3px; }
+  .status { margin-top: 10px; padding: 8px; background: #1a1a1a; border-radius: 5px; font-size: 11px; min-height: 40px; max-height: 160px; overflow-y: auto; border: 1px solid #2a2a2a; }
+  .status .line { margin-bottom: 3px; font-family: ui-monospace, monospace; }
+  .ok { color: #4ade80; }
+  .err { color: #f87171; }
+  .info { color: #93c5fd; }
+  .warn { color: #fbbf24; }
+  .syncAll { background: linear-gradient(135deg, #ff6b35, #e63946) !important; color: white !important; border: none !important; grid-column: 1 / -1; padding: 12px !important; font-size: 13px !important; }
+  .pull { background: #166534 !important; color: white !important; grid-column: 1 / -1; }
+  footer { padding: 8px 16px; background: #0a0a0a; font-size: 10px; color: #666; display: flex; justify-content: space-between; border-top: 1px solid #1f1f1f; }
+  .section-label { font-size: 10px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin: 14px 0 4px; font-weight: 600; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>🍽️ Restaurant POS Sync</h1>
+    <div class="sub">v8 · Brands · Outlets · Menu · Reviews</div>
+  </header>
+  <div class="body">
+    <div class="row">
+      <label>Platform</label>
+      <select id="platform">
+        <option value="zomato">🟥 Zomato Partner</option>
+        <option value="swiggy">🟧 Swiggy Partner</option>
+      </select>
+    </div>
+    <div class="row">
+      <label>CRM endpoint</label>
+      <input id="endpoint" placeholder="https://your-app.up.railway.app" />
+    </div>
+
+    <div class="section-label">⚡ One-click full sync</div>
+    <div class="btn-grid">
+      <button id="syncAll" class="syncAll">🚀 Sync EVERYTHING (Brands → Outlets → Menu → Reviews)</button>
+    </div>
+
+    <div class="section-label">🎯 Individual syncs</div>
+    <div class="btn-grid">
+      <button id="syncBrands"><span class="ico">🏷️</span>Brands</button>
+      <button id="syncOutlets"><span class="ico">🏪</span>Outlets</button>
+      <button id="syncMenu"><span class="ico">🍽️</span>Menu+Variants</button>
+      <button id="syncInventory"><span class="ico">📦</span>Inventory</button>
+      <button id="syncOrders"><span class="ico">🧾</span>Orders</button>
+      <button id="syncReviews"><span class="ico">⭐</span>Reviews</button>
+    </div>
+
+    <div class="section-label">🔄 Background</div>
+    <div class="btn-grid">
+      <button id="pollOn" class="pull">▶ Start Auto-Pull (Orders + Reviews)</button>
+    </div>
+
+    <div class="status" id="status"><span class="info">v8 ready. Pick platform → Sync EVERYTHING.</span></div>
+  </div>
+  <footer>
+    <span id="footPlatform">Zomato</span>
+    <span id="footState">idle</span>
+  </footer>
+  <script src="popup.js"></script>
+</body>
+</html>
